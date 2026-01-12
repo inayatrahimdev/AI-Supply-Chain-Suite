@@ -1,4 +1,3 @@
-Got it, Inayat! You want **one single, ready-to-use Markdown code block** that contains the **entire README** including **dataset, modules, business impact, installation, user guide, deployment, contributing, license, citation, and acknowledgments**—all in **one continuous code block**. Here's the **complete all-in-one `README.md`**:
 
 ````markdown
 # AI-Supply-Chain-Suite
@@ -192,16 +191,3 @@ Models implemented using TensorFlow, scikit-learn, Prophet, and NetworkX. UI pow
 
 ```
 
----
-
-If you want, I can **also create a polished “industry-grade docs folder”** for this repo with:  
-
-- **Dashboard screenshots**  
-- **Flow diagrams** (Transport Forecast → Risk → Route)  
-- **Model architecture illustrations**  
-- **Pipeline workflow**  
-
-…so your GitHub repo will be **fully enterprise-ready** for stakeholders and investors.  
-
-Do you want me to do that next?
-```
