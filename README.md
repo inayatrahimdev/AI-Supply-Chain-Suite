@@ -189,5 +189,4 @@ Models implemented using TensorFlow, scikit-learn, Prophet, and NetworkX. UI pow
 
 **Questions?** Open an issue or reach out via email.
 
-```
 
