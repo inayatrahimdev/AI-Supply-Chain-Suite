@@ -1,5 +1,3 @@
-
-````markdown
 # AI-Supply-Chain-Suite
 
 **A production-ready supply chain intelligence system combining time-series forecasting, risk assessment, and route optimization in a unified Streamlit interface.**
@@ -188,5 +186,6 @@ Models implemented using TensorFlow, scikit-learn, Prophet, and NetworkX. UI pow
 ---
 
 **Questions?** Open an issue or reach out via email.
+
 
 
