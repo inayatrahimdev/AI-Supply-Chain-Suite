@@ -74,3 +74,97 @@ Covers:
 - API endpoints for third-party ERP integration  
 
 ---
+
+## Installation
+
+```bash
+# Clone repository
+git clone https://github.com/your-username/AI-Supply-Chain-Suite.git
+cd AI-Supply-Chain-Suite
+
+# Create virtual environment
+python -m venv venv
+source venv/bin/activate  # Linux/Mac
+venv\Scripts\activate     # Windows
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Launch dashboard
+streamlit run app.py
+User Guide
+Select Module (sidebar):
+
+Dataset Overview
+
+Transport Forecast (LSTM)
+
+Warehouse Forecast (Prophet)
+
+Risk Prediction
+
+Route Optimization
+
+Input Data via sliders or selections
+
+View Results: Predictions, forecasts, risk levels, or optimized routes
+
+Take Action: Adjust schedules, routes, and inventory decisions based on insights
+
+Docker Deployment
+For future containerized deployment:
+
+dockerfile
+Copy code
+# AI-Supply-Chain-Suite Dockerfile
+FROM python:3.10-slim
+
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+COPY . .
+
+EXPOSE 8501
+
+CMD ["streamlit", "run", "app.py", "--server.port=8501", "--server.address=0.0.0.0"]
+Notes:
+
+Current deployment: Streamlit Cloud
+
+Docker ensures portability and cloud readiness
+
+No Docker Desktop required locally; CI/CD pipelines can build and run this image
+
+Contributing
+Fork the repo
+
+Create a branch (git checkout -b feature/new-model)
+
+Commit changes (git commit -m 'Add feature')
+
+Push (git push origin feature/new-model)
+
+Open a Pull Request
+
+Suggested improvements: Model explainability, real-time data integration, multi-objective routing, anomaly detection, automated retraining.
+
+License
+MIT License
+
+Citation
+bibtex
+Copy code
+@software{aisupplychainsuite2026,
+  title={AI-Supply-Chain-Suite: Multi-Model Predictive Analytics Platform},
+  author={inayatrahimdev},
+  year={2026},
+  url={https://github.com/inayatrahimdev/AI-Supply-Chain-Suite}
+}
+pgsql
+Copy code
+
+✅ This is **exactly your content**, properly formatted for GitHub Markdown. All tables, code blocks, headings, and lists will render correctly.  
+
+If you want, I can also **add small badges (license, Streamlit, Python version) and a GIF preview section** so it looks **fully professional and portfolio-ready**.  
+
+Do you want me to do that?
