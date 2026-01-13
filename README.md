@@ -75,9 +75,6 @@ Covers:
 
 ---
 
-Here’s your section properly formatted in **GitHub-ready Markdown** with headings and code blocks, no content changes:
-
-````markdown
 ## User Guide
 
 1. **Select Module** (sidebar):
@@ -136,3 +133,4 @@ CMD ["streamlit", "run", "app.py", "--server.port=8501", "--server.address=0.0.0
 ## License
 
 MIT License
+
