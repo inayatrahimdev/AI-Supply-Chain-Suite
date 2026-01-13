@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
 import plotly.express as px
 
 from utils.preprocessing import load_data, fill_missing
@@ -19,9 +18,9 @@ st.set_page_config(
     page_icon="🚚"
 )
 
-st.title("🚚 AI-Powered Supply Chain Management System (Fully Interactive)")
+st.title("🚚 AI-Powered Supply Chain Management System")
 st.markdown("""
-Welcome! Explore **real-time AI-powered supply chain analytics**:
+Explore **real-time AI-powered supply chain analytics**:
 - Transport forecast (LSTM)
 - Warehouse forecast (Prophet)
 - Risk prediction (Random Forest)
@@ -29,18 +28,35 @@ Welcome! Explore **real-time AI-powered supply chain analytics**:
 """)
 
 # -------------------------
-# LOAD AND PREPROCESS DATA
+# LOAD DATA (FAST)
 # -------------------------
 @st.cache_data
 def load_and_preprocess():
     df = load_data("data/supply_chain_dataset.csv")
-    df = fill_missing(df)
-    return df
+    return fill_missing(df)
 
 df = load_and_preprocess()
 
 # -------------------------
-# SIDEBAR MODULE SELECTION
+# LOAD MODELS ONCE (CRITICAL FIX)
+# -------------------------
+@st.cache_resource
+def load_models():
+    with st.spinner("Loading AI models (one-time)..."):
+        lstm_model, scaler, seq_len, features = train_lstm(df)
+        prophet_model, prophet_forecast = train_prophet(df)
+        risk_model, risk_acc = train_risk(df)
+
+    return {
+        "lstm": (lstm_model, scaler, seq_len, features),
+        "prophet": (prophet_model, prophet_forecast),
+        "risk": (risk_model, risk_acc)
+    }
+
+MODELS = load_models()
+
+# -------------------------
+# SIDEBAR
 # -------------------------
 section = st.sidebar.radio(
     "Select Module",
@@ -54,120 +70,93 @@ section = st.sidebar.radio(
 )
 
 # -------------------------
-# MODULE 1: Dataset Overview
+# DATASET OVERVIEW
 # -------------------------
 if section == "Dataset Overview":
     st.subheader("📊 Dataset Overview")
-    st.write("Preview and explore the dataset:")
     st.dataframe(df.head(20))
-    st.write(f"**Shape:** {df.shape[0]} rows × {df.shape[1]} columns")
-    st.info("Includes transport, warehouse, risk metrics, timestamps.")
+    st.write(f"Shape: {df.shape[0]} rows × {df.shape[1]} columns")
 
 # -------------------------
-# MODULE 2: Transport Forecast (LSTM)
+# TRANSPORT FORECAST (LSTM)
 # -------------------------
 elif section == "Transport Forecast (LSTM)":
-    st.subheader("🚛 Delivery Time Prediction (LSTM)")
+    st.subheader("🚛 Delivery Time Prediction")
 
-    @st.cache_resource
-    def get_lstm_model():
-        return train_lstm(df)
+    lstm_model, scaler, seq_len, features = MODELS["lstm"]
 
-    lstm_model, scaler, seq_len, features = get_lstm_model()
-
-    st.markdown("### Adjust Inputs for Prediction")
     col1, col2 = st.columns(2)
     with col1:
-        fuel = st.slider("Fuel Consumption Rate (L/h)", float(df['fuel_consumption_rate'].min()), float(df['fuel_consumption_rate'].max()), step=0.1)
-        traffic = st.slider("Traffic Congestion Level", float(df['traffic_congestion_level'].min()), float(df['traffic_congestion_level'].max()), step=0.01)
-        weather = st.slider("Weather Severity", float(df['weather_condition_severity'].min()), float(df['weather_condition_severity'].max()), step=0.01)
+        fuel = st.slider("Fuel Consumption Rate", float(df['fuel_consumption_rate'].min()), float(df['fuel_consumption_rate'].max()))
+        traffic = st.slider("Traffic Congestion", float(df['traffic_congestion_level'].min()), float(df['traffic_congestion_level'].max()))
+        weather = st.slider("Weather Severity", float(df['weather_condition_severity'].min()), float(df['weather_condition_severity'].max()))
     with col2:
-        driver = st.slider("Driver Behavior Score", float(df['driver_behavior_score'].min()), float(df['driver_behavior_score'].max()), step=0.01)
-        fatigue = st.slider("Fatigue Score", float(df['fatigue_monitoring_score'].min()), float(df['fatigue_monitoring_score'].max()), step=0.01)
+        driver = st.slider("Driver Behavior Score", float(df['driver_behavior_score'].min()), float(df['driver_behavior_score'].max()))
+        fatigue = st.slider("Fatigue Score", float(df['fatigue_monitoring_score'].min()), float(df['fatigue_monitoring_score'].max()))
 
-    # Prepare input for LSTM
     input_vector = np.array([[fuel, traffic, weather, driver, fatigue]])
     repeated = np.repeat(input_vector, seq_len, axis=0)
-    scaled_sequence = scaler.transform(np.hstack([repeated, np.zeros((seq_len, 1))]))[:, :len(features)]
-    X_pred = scaled_sequence.reshape(1, seq_len, len(features))
 
-    pred_scaled = lstm_model.predict(X_pred, verbose=0)
-    pred = pred_scaled[0][0]
+    scaled = scaler.transform(
+        np.hstack([repeated, np.zeros((seq_len, 1))])
+    )[:, :len(features)]
 
-    st.success(f"Predicted Delivery Time Deviation: {pred:.3f} (scaled units)")
-    st.info("Higher values → greater deviation from scheduled delivery.")
+    X_pred = scaled.reshape(1, seq_len, len(features))
+    pred = lstm_model.predict(X_pred, verbose=0)[0][0]
+
+    st.success(f"Predicted Delivery Deviation: {pred:.3f}")
 
 # -------------------------
-# MODULE 3: Warehouse Forecast (Prophet)
+# WAREHOUSE FORECAST (PROPHET)
 # -------------------------
 elif section == "Warehouse Forecast (Prophet)":
-    st.subheader("🏭 Warehouse Inventory Forecast (Prophet)")
+    st.subheader("🏭 Inventory Forecast")
 
-    @st.cache_resource
-    def get_prophet_model():
-        return train_prophet(df)
+    _, forecast = MODELS["prophet"]
 
-    model, forecast = get_prophet_model()
+    fig = px.line(forecast, x="ds", y="yhat", title="30-Day Inventory Forecast")
+    fig.add_scatter(x=forecast["ds"], y=forecast["yhat_lower"], name="Lower Bound", line=dict(dash="dash"))
+    fig.add_scatter(x=forecast["ds"], y=forecast["yhat_upper"], name="Upper Bound", line=dict(dash="dash"))
 
-    # Plot forecast
-    fig = px.line(forecast, x='ds', y='yhat', title="30-Day Warehouse Inventory Forecast")
-    fig.add_scatter(x=forecast['ds'], y=forecast['yhat_lower'], mode='lines', name='Lower Bound', line=dict(dash='dash'))
-    fig.add_scatter(x=forecast['ds'], y=forecast['yhat_upper'], mode='lines', name='Upper Bound', line=dict(dash='dash'))
     st.plotly_chart(fig, use_container_width=True)
 
-    st.info("Blue line = forecast, dashed lines = uncertainty interval")
-
 # -------------------------
-# MODULE 4: Risk Prediction
+# RISK PREDICTION
 # -------------------------
 elif section == "Risk Prediction":
-    st.subheader("⚠️ Supply Chain Risk Prediction")
+    st.subheader("⚠️ Risk Prediction")
 
-    @st.cache_resource
-    def get_risk_model():
-        return train_risk(df)
-
-    model, acc = get_risk_model()
-
+    risk_model, acc = MODELS["risk"]
     st.metric("Model Accuracy", f"{acc*100:.2f}%")
-    st.write("Adjust input values to simulate risk prediction:")
 
-    # Input sliders for risk features
     col1, col2, col3 = st.columns(3)
     with col1:
-        delay = st.slider("Delay Probability", float(df['delay_probability'].min()), float(df['delay_probability'].max()), step=0.01)
-        disruption = st.slider("Disruption Likelihood Score", float(df['disruption_likelihood_score'].min()), float(df['disruption_likelihood_score'].max()), step=0.01)
+        delay = st.slider("Delay Probability", float(df['delay_probability'].min()), float(df['delay_probability'].max()))
+        disruption = st.slider("Disruption Likelihood", float(df['disruption_likelihood_score'].min()), float(df['disruption_likelihood_score'].max()))
     with col2:
-        port = st.slider("Port Congestion Level", float(df['port_congestion_level'].min()), float(df['port_congestion_level'].max()), step=0.01)
-        supplier = st.slider("Supplier Reliability Score", float(df['supplier_reliability_score'].min()), float(df['supplier_reliability_score'].max()), step=0.01)
+        port = st.slider("Port Congestion", float(df['port_congestion_level'].min()), float(df['port_congestion_level'].max()))
+        supplier = st.slider("Supplier Reliability", float(df['supplier_reliability_score'].min()), float(df['supplier_reliability_score'].max()))
     with col3:
-        customs = st.slider("Customs Clearance Time", float(df['customs_clearance_time'].min()), float(df['customs_clearance_time'].max()), step=0.1)
+        customs = st.slider("Customs Clearance Time", float(df['customs_clearance_time'].min()), float(df['customs_clearance_time'].max()))
 
-    # Make single risk prediction
-    input_risk = np.array([[delay, disruption, port, supplier, customs]])
-    risk_pred = model.predict(input_risk)[0]
+    X = np.array([[delay, disruption, port, supplier, customs]])
+    risk = risk_model.predict(X)[0]
 
-    st.success(f"Predicted Risk Level: {risk_pred}")
-    st.info("Risk = Low / Medium / High (dataset dependent)")
+    st.success(f"Predicted Risk Level: {risk}")
 
 # -------------------------
-# MODULE 5: Route Optimization
+# ROUTE OPTIMIZATION
 # -------------------------
 elif section == "Route Optimization":
-    st.subheader("🗺️ Optimal Transport Route")
+    st.subheader("🗺️ Route Optimization")
 
     locations = ['Warehouse', 'A', 'B', 'C', 'Destination']
-
-    start = st.selectbox("Select Start Location", locations)
-    end = st.selectbox("Select Destination", locations, index=4)
+    start = st.selectbox("Start Location", locations)
+    end = st.selectbox("Destination", locations, index=4)
 
     if start == end:
-        st.warning("Start and Destination cannot be the same.")
+        st.warning("Start and destination must differ.")
     else:
-        path, cost = get_best_route(start=start, end=end)
-
+        path, cost = get_best_route(start, end)
         st.success(" → ".join(path))
-        st.metric("Total Route Cost", f"{cost}$ Total Cost")
-
-
-
+        st.metric("Total Cost", f"{cost}$")
