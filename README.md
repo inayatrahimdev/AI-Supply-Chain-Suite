@@ -160,11 +160,3 @@ Copy code
   year={2026},
   url={https://github.com/inayatrahimdev/AI-Supply-Chain-Suite}
 }
-pgsql
-Copy code
-
-✅ This is **exactly your content**, properly formatted for GitHub Markdown. All tables, code blocks, headings, and lists will render correctly.  
-
-If you want, I can also **add small badges (license, Streamlit, Python version) and a GIF preview section** so it looks **fully professional and portfolio-ready**.  
-
-Do you want me to do that?
