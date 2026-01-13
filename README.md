@@ -129,6 +129,3 @@ MIT License
   year={2026},
   url={https://github.com/inayatrahimdev/AI-Supply-Chain-Suite}
 }
-```
-
-```
