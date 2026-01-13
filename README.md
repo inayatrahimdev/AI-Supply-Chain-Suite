@@ -1,46 +1,43 @@
-# AI-Supply-Chain-Suite: https://ai-supply-chain-suite.streamlit.app/
+# AI-Supply-Chain-Suite
+**Live App:** [https://ai-supply-chain-suite.streamlit.app/](https://ai-supply-chain-suite.streamlit.app/)
 
-**A production-ready supply chain intelligence system combining time-series forecasting, risk assessment, and route optimization in a unified Streamlit interface.**
+A production-ready supply chain intelligence system combining forecasting, risk assessment, and route optimization in a unified Streamlit interface.
 
 ---
 
-## What This Actually Does
+## Overview
 
-Most supply chain tools treat prediction as a single-model problem. This system acknowledges that supply chains are multi-faceted: delivery times depend on driver behavior and weather patterns, warehouse inventory follows seasonal trends, risk emerges from supplier reliability and port congestion, and routes need real-time optimization. Each domain requires different modeling approaches.
+This system tackles real-world supply chain complexity:  
 
-**Key Capabilities:**
-- **Transport Forecasting (LSTM):** Predict delivery deviations for proactive scheduling.
-- **Warehouse Forecasting (Prophet):** 30-day inventory predictions with uncertainty intervals.
-- **Risk Prediction (Random Forest):** Identify high-risk shipments or operational bottlenecks.
-- **Route Optimization (Dijkstra):** Find cost-efficient paths between warehouses and destinations.
+- **Transport:** LSTM predicts delivery deviations  
+- **Warehouse:** Prophet forecasts inventory for 30 days  
+- **Risk:** Random Forest identifies high-risk operations  
+- **Route:** Dijkstra finds cost-efficient paths  
 
-<img width="954" height="398" alt="Dashboard Preview" src="https://github.com/user-attachments/assets/0f54e0de-ffe9-423d-a625-a26b19b131a5" />
+**Business Impact:**
 
-**Business Value:**
-- Streamlines operations and reduces human error  
-- Enables proactive risk management and timely decision-making  
-- Optimizes routes, saving fuel, time, and operational cost  
-- Reduces warehouse stockouts and overstocking through predictive inventory management  
+- Streamlines operations and reduces errors  
+- Enables proactive risk management  
+- Optimizes routes, saving fuel, time, and cost  
+- Predicts inventory trends to prevent stockouts/overstock
 
 ---
 
 ## Dataset
 
-The system uses a **32,065-row time-series dataset with 26 features**, covering:
+**dynamic_supply_chain_logistics_dataset.csv** (32,065 rows, 26 features)
 
-- **Transport metrics:** GPS coordinates, fuel consumption, traffic congestion, weather severity, driver behavior, fatigue monitoring  
-- **Warehouse metrics:** Inventory levels, loading/unloading times, equipment availability, order fulfillment status  
-- **Risk indicators:** Port congestion, supplier reliability, customs clearance time, disruption likelihood, delay probability  
-- **IoT sensors:** Temperature monitoring, cargo condition status  
-- **Temporal data:** Timestamps for time-series analysis  
+Covers:
 
-**File:** `dynamic_supply_chain_logistics_dataset.csv`  
-
-This dataset **simulates real-world logistics operations** and allows dynamic, predictive analytics for transport, warehouse, and risk management.
+- Transport metrics: GPS, fuel, traffic, weather, driver behavior, fatigue  
+- Warehouse metrics: Inventory, loading/unloading, equipment, order status  
+- Risk indicators: Port congestion, supplier reliability, customs clearance, delays  
+- IoT sensors: Temperature, cargo condition  
+- Temporal data: Timestamps for time-series analysis
 
 ---
 
-## Installation & Setup
+## Installation
 
 ```bash
 # Clone repository
@@ -63,110 +60,67 @@ streamlit run app.py
 
 ## User Guide
 
-The platform is **interactive and intuitive**, designed for supply chain managers, logistics teams, and business analysts.
+1. **Select Module** (sidebar):
 
-### Step 1: Select Module
+   * Dataset Overview
+   * Transport Forecast (LSTM)
+   * Warehouse Forecast (Prophet)
+   * Risk Prediction
+   * Route Optimization
 
-Use the **sidebar** to select:
+2. **Input Data** via sliders or selections
 
-* Dataset Overview
-* Transport Forecast (LSTM)
-* Warehouse Forecast (Prophet)
-* Risk Prediction
-* Route Optimization
+3. **View Results:** Predictions, forecasts, risk levels, or optimized routes
 
-### Step 2: Input Data
-
-* **Transport Forecast:** Adjust sliders for fuel, traffic, weather, driver score, and fatigue.
-* **Warehouse Forecast:** Forecast generated automatically from historical inventory.
-* **Risk Prediction:** Adjust delay probability, disruption score, port congestion, supplier reliability, and customs time.
-* **Route Optimization:** Select start and end locations.
-
-### Step 3: View Results
-
-* Predicted delivery deviation (Transport)
-* 30-day inventory forecast (Warehouse)
-* Risk level (Low / Medium / High)
-* Optimal route and total cost
-
-### Step 4: Make Decisions
-
-* Adjust schedules and transport routes based on predictions
-* Plan procurement to avoid stockouts or overstock
-* Take preventive action on medium/high-risk shipments
+4. **Take Action:** Adjust schedules, routes, and inventory decisions based on insights
 
 ---
 
-## Extending the System
+## Docker Deployment
 
-### Adding New Models
-
-1. Create model file in `utils/` (e.g., `utils/demand_forecasting.py`)
-2. Implement training function returning model and metadata
-3. Add module to `app.py` sidebar and create UI section
-4. Use `@st.cache_resource` for model caching
-
-### Integrating Real-Time Data
-
-Replace CSV loading with API calls:
-
-```python
-# In preprocessing.py
-def load_data_from_api():
-    response = requests.get('https://api.supplychain.com/metrics')
-    return pd.DataFrame(response.json())
-```
-
-### Adding Authentication
-
-Streamlit supports authentication via `streamlit-authenticator` or custom session state. Add before module selection in `app.py`.
-
-### Deployment
-
-**Streamlit Cloud:** Push to GitHub, connect repo to Streamlit Cloud.
-**Docker:** Example `Dockerfile`:
+For future containerized deployment:
 
 ```dockerfile
-FROM python:3.9-slim
+# AI-Supply-Chain-Suite Dockerfile
+FROM python:3.10-slim
+
 WORKDIR /app
 COPY requirements.txt .
-RUN pip install -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
+
 EXPOSE 8501
+
 CMD ["streamlit", "run", "app.py", "--server.port=8501", "--server.address=0.0.0.0"]
 ```
+
+**Notes:**
+
+* Current deployment: Streamlit Cloud
+* Docker ensures portability and cloud readiness
+* No Docker Desktop required locally; CI/CD pipelines can build and run this image
 
 ---
 
 ## Contributing
 
-This is an academic project, but contributions are welcome:
+1. Fork the repo
+2. Create a branch (`git checkout -b feature/new-model`)
+3. Commit changes (`git commit -m 'Add feature'`)
+4. Push (`git push origin feature/new-model`)
+5. Open a Pull Request
 
-1. Fork the repository
-2. Create feature branch (`git checkout -b feature/improved-risk-model`)
-3. Commit changes (`git commit -m 'Add XGBoost risk model'`)
-4. Push to branch (`git push origin feature/improved-risk-model`)
-5. Open Pull Request
-
-**Areas for improvement**:
-
-* Model explainability (SHAP, LIME)
-* Real-time data integration
-* Multi-objective route optimization
-* Anomaly detection for warehouse inventory
-* Model retraining pipelines
+**Suggested improvements:** Model explainability, real-time data integration, multi-objective routing, anomaly detection, automated retraining.
 
 ---
 
 ## License
 
-MIT License - see LICENSE file for details.
+MIT License
 
 ---
 
 ## Citation
-
-If you use this code in research or projects:
 
 ```bibtex
 @software{aisupplychainsuite2024,
@@ -177,16 +131,4 @@ If you use this code in research or projects:
 }
 ```
 
----
-
-## Acknowledgments
-
-Models implemented using TensorFlow, scikit-learn, Prophet, and NetworkX. UI powered by Streamlit.
-
----
-
-**Questions?** Open an issue or reach out via email.
-
-
-
-
+```
