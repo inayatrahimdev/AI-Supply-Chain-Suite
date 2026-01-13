@@ -22,6 +22,7 @@ This platform enables organizations to streamline operations, reduce wastage, an
 - Enables proactive risk management  
 - Optimizes routes, saving fuel, time, and cost  
 - Predicts inventory trends to prevent stockouts/overstock
+  
 ## 📊 Operational Impact
 Module	Operational Impact	Business Benefit
 Transport Forecast	Anticipates delivery delays	Minimizes late shipment penalties
@@ -72,26 +73,6 @@ Dynamic routing with traffic and weather updates
 Dashboard alerts for high-risk shipments
 
 API endpoints for third-party ERP integration
----
-
-## Installation
-
-```bash
-# Clone repository
-git clone https://github.com/your-username/AI-Supply-Chain-Suite.git
-cd AI-Supply-Chain-Suite
-
-# Create virtual environment
-python -m venv venv
-source venv/bin/activate  # Linux/Mac
-venv\Scripts\activate     # Windows
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Launch dashboard
-streamlit run app.py
-````
 
 ---
 
@@ -166,4 +147,5 @@ MIT License
   year={2026},
   url={https://github.com/inayatrahimdev/AI-Supply-Chain-Suite}
 }
+
 
